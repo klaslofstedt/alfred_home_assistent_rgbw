@@ -19,10 +19,11 @@
 #include "pwm.h"
 #include "mqtt.h"
 #include "wifi.h"
+#include "rgbw.h"
+#include "poor_mans_pwm.h"
 
 
 //xSemaphoreHandle wifi_alive;
-xSemaphoreHandle pwm_set = 0;
 //xQueueHandle publish_queue;
 
 //void pwm_setup(void);
@@ -46,42 +47,18 @@ printf("Publish queue overflow.\r\n");
 }
 }*/
 
-void pwm_setup(void);
-
-static void pwm_task(void *pvParameters)
-{
-    pwm_setup();
-    
-    while(1){
-        if(xSemaphoreTake(pwm_set, portMAX_DELAY)){
-            // set the pwms
-        }
-    }
-}
-void pwm_setup(void)
-{
-    uint8_t pins[4];
-    pins[0] = 12; // red
-    pins[1] = 13; // green
-    pins[2] = 14; // blue
-    pins[3] = 15; // yellow (white)
-
-    pwm_init(4, pins);
-    pwm_set_freq(1000);
-    pwm_set_duty(UINT16_MAX/2);
-    pwm_start();
-}
 
 void user_init(void)
 {
     uart_set_baud(0, 115200);
+    rgbw_init();
+    //HW_init();
     printf("SDK version:%s\n", sdk_system_get_sdk_version());
 
     vSemaphoreCreateBinary(wifi_alive);
-    //vSemaphoreCreateBinary(wifi_alive);
-    vSemaphoreCreateBinary(pwm_set);
+    //vSemaphoreCreateBinary(pwm_sem);
 
-    publish_queue = xQueueCreate(3, PUB_MSG_LEN);
+    publish_queue = xQueueCreate(4, PUB_MSG_LEN);
 
     xTaskCreate(
             &wifi_task, 
@@ -91,7 +68,6 @@ void user_init(void)
             2, 
             NULL);
 
-    //xTaskCreate(&beat_task, (int8_t *)"beat_task", 256, NULL, 3, NULL);
     xTaskCreate(
             &mqtt_task, 
             (int8_t *)"mqtt_task", 
@@ -102,19 +78,21 @@ void user_init(void)
 
     /*
     xTaskCreate(
-            &parse_task,
-            (int8_t *)"parse_task", 
-            256, 
+            &rgbw_task, 
+            (int8_t *)"rgbw_task", 
+            1024, 
             NULL, 
             4, 
             NULL);
             */
 
+    /*
     xTaskCreate(
-            &pwm_task, 
-            (int8_t *)"pwm_task", 
-            256, 
-            NULL, 
-            5, 
+            &rainbow_task,
+            (int8_t *)"rainbow_task",
+            256,
+            NULL,
+            4,
             NULL);
+            */
 }

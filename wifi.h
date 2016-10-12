@@ -13,8 +13,8 @@
 #include <espressif/esp_sta.h>
 #include <espressif/esp_wifi.h>
 
-#include <paho_mqtt_c/MQTTESP8266.h>
-#include <paho_mqtt_c/MQTTClient.h>
+//#include <paho_mqtt_c/MQTTESP8266.h>
+//#include <paho_mqtt_c/MQTTClient.h>
 
 #include <semphr.h>
 

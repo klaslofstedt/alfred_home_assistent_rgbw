@@ -75,15 +75,5 @@ build/program//wifi.o: \
  ../../FreeRTOS/Source/include/task.h \
  ../../FreeRTOS/Source/include/list.h ../../include/ssid_config.h \
  ../../include/espressif/esp_sta.h ../../include/espressif/esp_wifi.h \
- ../../extras/paho_mqtt_c/../paho_mqtt_c/MQTTESP8266.h \
- ../../extras/paho_mqtt_c/../paho_mqtt_c/MQTTClient.h \
- ../../extras/paho_mqtt_c/../paho_mqtt_c/MQTTPacket.h \
- ../../extras/paho_mqtt_c/../paho_mqtt_c/MQTTConnect.h \
- ../../extras/paho_mqtt_c/../paho_mqtt_c/MQTTPublish.h \
- ../../extras/paho_mqtt_c/../paho_mqtt_c/MQTTSubscribe.h \
- ../../extras/paho_mqtt_c/../paho_mqtt_c/MQTTUnsubscribe.h \
- ../../extras/paho_mqtt_c/../paho_mqtt_c/MQTTFormat.h \
- ../../extras/paho_mqtt_c/../paho_mqtt_c/StackTrace.h \
- ../../extras/paho_mqtt_c/../paho_mqtt_c/MQTTESP8266.h \
  ../../FreeRTOS/Source/include/semphr.h \
  ../../FreeRTOS/Source/include/queue.h

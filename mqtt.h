@@ -28,21 +28,10 @@
 
 xQueueHandle publish_queue;
 
-typedef struct
-{
-    uint8_t status;
-    uint8_t red;
-    uint8_t green;
-    uint8_t blue;
-    uint8_t white;
-} rgbw_t;
-
 
 void mqtt_topic_received(mqtt_message_data_t *md);
 const char *mqtt_get_my_id(void);
 void mqtt_task(void *pvParameters);
 void mqtt_message_process(char **data, uint8_t len);
-void rgb_calc(uint16_t value, float *r, float *g, float *b);
-void saturation_calc(uint16_t value, float *color, float *white);
 
 #endif
