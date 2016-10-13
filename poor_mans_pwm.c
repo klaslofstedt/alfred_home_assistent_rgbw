@@ -1,3 +1,4 @@
+#include <stdlib.h>
 #include "poor_mans_pwm.h"
 
 /* Poor mans PWM
@@ -5,55 +6,77 @@
  * a PWM signal of 255 Hz and a resolution of 255. 
  * Verified with Saleae logic analysator.
  */
-uint8_t pwm_pin1, pwm_pin2, pwm_pin3;
-uint8_t *duty1;
-uint8_t *duty2;
-uint8_t *duty3;
-uint8_t *duty4;
+static void frc1_interrupt_handler(void);
+static void pmp_pwm_set(uint8_t pin, uint8_t duty);
+static void pmp_pwm_pins_update(void);
 
-static volatile uint32_t frc1_interrupt_count;
-void frc1_interrupt_handler(void)
-{
-    frc1_interrupt_count++;
-    //xSemaphoreGive(pwm_sem);
-    poor_mans_pwm_exec();
-}
+static uint8_t *pmp_pwm_pins_g = NULL;
+static uint8_t *pmp_pwm_duty_g = NULL;
+static uint8_t pmp_pwm_pins_size_g = 0;
+static uint8_t resolution_g = 0;
+static uint8_t frequency_g = 0;
 
-void poor_mans(uint8_t pin, uint8_t duty)
+static volatile uint32_t frc1_interrupt_count_g;
+
+static void pmp_pwm_set(uint8_t pin, uint8_t duty)
 {
-    uint8_t resolution = 255;
-    if(frc1_interrupt_count < duty){
+    if(frc1_interrupt_count_g < duty){
         gpio_write(pin, 1);
     }
     else{
         gpio_write(pin, 0);
     }
-    if(frc1_interrupt_count == resolution){
-        frc1_interrupt_count = 0;
+    if(frc1_interrupt_count_g == resolution_g){
+        frc1_interrupt_count_g = 0;
     }
 }
 
-void poor_mans_pwm_exec(void)
+static void pmp_pwm_pins_update(void)
 {
-    poor_mans(pwm_pin1, duty1);
-    poor_mans(pwm_pin2, duty2);
-    poor_mans(pwm_pin3, duty3);
-    poor_mans(pwm_pin4, duty4);
-    /*
-    poor_mans(RED, lamp_g.red);
-    poor_mans(GREEN, lamp_g.green);
-    poor_mans(BLUE, lamp_g.blue);
-    */
+    uint8_t i;
+    for(i = 0; i < pmp_pwm_pins_size_g; i++){
+        pmp_pwm_set(pmp_pwm_pins_g[i], pmp_pwm_duty_g[i]);
+    }
 } 
 
-void poor_mans_pwm_init(uint8_t frequency, uint8_t resolution)
+static void frc1_interrupt_handler(void)
 {
+    frc1_interrupt_count_g++;
+    pmp_pwm_pins_update();
+}
+
+void pmp_pwm_set_duty(uint8_t *temp, uint8_t size)
+{
+    uint8_t i;
+    for(i = 0; i < size; i++){
+        pmp_pwm_duty_g[i] = temp[i];
+    }
+}
+
+
+void pmp_pwm_pins_init(uint8_t *pins, uint8_t size)
+{
+    pmp_pwm_pins_g = malloc(sizeof(uint8_t) * size);
+    pmp_pwm_duty_g = malloc(sizeof(uint8_t) * size);
+    pmp_pwm_pins_size_g = size;
+    uint8_t i;
+    for(i = 0; i < size; i++){
+        gpio_enable(pins[i], GPIO_OUTPUT);
+        pmp_pwm_pins_g[i] = pins[i];
+        pmp_pwm_duty_g[i] = 0;
+    }
+}
+
+void pmp_pwm_init(uint8_t frequency, uint8_t resolution)
+{
+    frequency_g = frequency;
+    resolution_g = resolution;
     // pause interrupt
     timer_set_interrupts(FRC1, false);
     timer_set_run(FRC1, false);
     // setup interrupt
     _xt_isr_attach(INUM_TIMER_FRC1, frc1_interrupt_handler);
-    timer_set_frequency(FRC1, frequency*resolution);
+    timer_set_frequency(FRC1, frequency_g*resolution_g);
     // start interrupt
     timer_set_interrupts(FRC1, true);
     timer_set_run(FRC1, true);

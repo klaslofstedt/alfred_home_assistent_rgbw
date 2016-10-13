@@ -1,16 +1,12 @@
-#ifndef RGBW_H
-#define RGBW_H
+#ifndef POOR_MANS_PWM_H
+#define POOR_MANS_PWM_H
 
 #include <stdint.h>
 #include <FreeRTOS.h>
 #include <task.h>
 #include <semphr.h>
 
-//xSemaphoreHandle pwm_sem;
-
-//void rgbw_task(void *arg);
-void frc1_interrupt_handler(void);
-void poor_mans(uint8_t pin, uint8_t duty);
-void poor_mans_pwm_exec(void);
-void poor_mans_pwm_init(uint8_t frequency, uint8_t resolution);
+void pmp_pwm_set_duty(uint8_t *temp, uint8_t size);
+void pmp_pwm_pins_init(uint8_t *pins, uint8_t size);
+void pmp_pwm_init(uint8_t frequency, uint8_t resolution);
 #endif

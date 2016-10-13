@@ -6,6 +6,7 @@
 #define RED 12
 #define GREEN 13
 #define BLUE 14
+#define WHITE 16
 // REAL ONES
 /*
 #define RED 13
@@ -13,6 +14,16 @@
 #define BLUE 14
 */
 #define SWITCH 15
+
+#define FREQENCY 0xff
+#define RESOLUTION 0xff
+#define SIZE 4
+
+static void rgbw_pwm_set_duty(void);
+static void rgbw_pins_init(void);
+static void rgbw_calc_rgb(uint16_t value, float *r, float *g, float *b);
+static void rgbw_calc_saturation(uint16_t value, float *color, float *white);
+static void rgbw_calc_pwm(uint16_t *data_array);
 
 rgbw_t lamp_g = {
     .status = 0,
@@ -22,12 +33,15 @@ rgbw_t lamp_g = {
     .white = 0
 };
 
+uint8_t pwm_pin_g[] = {RED, GREEN, BLUE, WHITE};
+uint8_t pwm_duty_g[] = {0, 0, 0, 0};
+
 void rainbow_task(void *delay)
 {
     uint16_t data_array[4] = {1, 100, 200, 0};
     while(1){
         printf("color: %d\n", data_array[3]);
-        pwm_values_calc(data_array);
+        rgbw_calc_pwm(data_array);
         vTaskDelay(10 / portTICK_RATE_MS);
         data_array[3]++;
         if(data_array[3] > 1530){
@@ -36,22 +50,25 @@ void rainbow_task(void *delay)
     }
 }
 
+static void rgbw_pwm_set_duty(void)
+{
+    pwm_duty_g[0] = lamp_g.red;
+    pwm_duty_g[1]= lamp_g.green;
+    pwm_duty_g[2] = lamp_g.blue;
+    pwm_duty_g[3]= lamp_g.white;
+
+    pmp_pwm_set_duty(pwm_duty_g, SIZE);
+}
 
 void rgbw_init(void)
 {
-    rgbw_pins_init();
-    // freq, res
-    poor_mans_pwm_init(255, 255);
-}
-void rgbw_pins_init(void)
-{
-    gpio_enable(RED, GPIO_OUTPUT);
-    gpio_enable(GREEN, GPIO_OUTPUT);
-    gpio_enable(BLUE, GPIO_OUTPUT);
+    // pmp - poor mans pwm
+    pmp_pwm_init(FREQENCY, RESOLUTION);
+    pmp_pwm_pins_init(pwm_pin_g, SIZE);
+    pmp_pwm_set_duty(pwm_duty_g, SIZE);
 }
 
-
-void rgb_calc(uint16_t value, float *r, float *g, float *b)
+static void rgbw_calc_rgb(uint16_t value, float *r, float *g, float *b)
 {
     if((float)value <= 255){
         *r = 255;
@@ -90,7 +107,7 @@ void rgb_calc(uint16_t value, float *r, float *g, float *b)
     }
 }
 
-void saturation_calc(uint16_t value, float *color, float *white)
+static void rgbw_calc_saturation(uint16_t value, float *color, float *white)
 {
     if((float)value >= 0 && (float)value <= 100){
         *white = 100;
@@ -116,7 +133,7 @@ void saturation_calc(uint16_t value, float *color, float *white)
  * w = color (0 - 1530)
  ****************************************/
 
-void mqtt_message_process(char **data, uint8_t len)
+void rgbw_parse_mqtt(char **data, uint8_t len)
 {
     // Totally fucking shit code. Rewrite
     uint8_t i;
@@ -148,15 +165,15 @@ void mqtt_message_process(char **data, uint8_t len)
         printf("data_array%d\n", data_array[i]);
     }
 #endif
-    pwm_values_calc(data_array);
+    rgbw_calc_pwm(data_array);
 }
 
-void pwm_values_calc(uint16_t *data_array)
+static void rgbw_calc_pwm(uint16_t *data_array)
 {
     // Not too shitty. Make a separate function for this.
     float temp_r = 0, temp_g = 0, temp_b = 0, temp_color = 0, temp_white = 0;
-    saturation_calc(data_array[2], &temp_color, &temp_white);
-    rgb_calc(data_array[3], &temp_r, &temp_g, &temp_b); 
+    rgbw_calc_saturation(data_array[2], &temp_color, &temp_white);
+    rgbw_calc_rgb(data_array[3], &temp_r, &temp_g, &temp_b); 
 
     lamp_g.status = (data_array[0]);
     lamp_g.red = (temp_r * ((float)data_array[1] / 100) * (temp_color / 100) * data_array[0]);
@@ -170,4 +187,6 @@ void pwm_values_calc(uint16_t *data_array)
     printf("blue%d\n", lamp_g.blue);
     printf("white%d\n", lamp_g.white);
 #endif
+
+    rgbw_pwm_set_duty();
 }

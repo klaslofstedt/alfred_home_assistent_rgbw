@@ -15,18 +15,9 @@ typedef struct
     uint8_t white;
 } rgbw_t;
 
-//void pwm_setup(void);
-//void pwm_task(void *pvParameters);
-//void HW_init(void);
-void rgbw_init(void);
-void rgbw_pins_init(void);
-void blue_task(void *duty_cycle);
-void red_task(void *duty_cycle);
-void rgb_calc(uint16_t value, float *r, float *g, float *b);
-void saturation_calc(uint16_t value, float *color, float *white);
-void mqtt_message_process(char **data, uint8_t len);
-void pwm_values_calc(uint16_t *data_array);
 void rainbow_task(void *delay);
+void rgbw_parse_mqtt(char **data, uint8_t len);
+void rgbw_init(void);
 
 #endif
 

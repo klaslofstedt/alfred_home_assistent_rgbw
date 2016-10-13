@@ -85,7 +85,7 @@ build/program//main.o: \
  ../../extras/paho_mqtt_c/../paho_mqtt_c/StackTrace.h \
  ../../extras/paho_mqtt_c/../paho_mqtt_c/MQTTESP8266.h \
  ../../FreeRTOS/Source/include/semphr.h \
- ../../FreeRTOS/Source/include/queue.h ../../extras/pwm/pwm.h \
+ ../../FreeRTOS/Source/include/queue.h \
  /home/klas/Workspace/Embedded/esp-open-rtos/examples/alfred_rgbw/mqtt.h \
  /home/klas/Workspace/Embedded/esp-open-rtos/examples/alfred_rgbw/math_lite.h \
  /home/klas/Workspace/Embedded/esp-open-rtos/examples/alfred_rgbw/wifi.h \

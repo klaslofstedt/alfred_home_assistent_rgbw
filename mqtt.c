@@ -18,7 +18,7 @@ void mqtt_topic_received(mqtt_message_data_t *md)
         printf("%c", ptr[i]);
     }
     printf("\n");
-    mqtt_message_process(ptr, message->payloadlen);
+    rgbw_parse_mqtt(ptr, message->payloadlen);
     free(ptr);
 }
 

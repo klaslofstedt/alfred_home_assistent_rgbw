@@ -16,48 +16,20 @@
 #include <paho_mqtt_c/MQTTClient.h>
 
 #include <semphr.h>
-#include "pwm.h"
+//#include "pwm.h"
 #include "mqtt.h"
 #include "wifi.h"
 #include "rgbw.h"
 #include "poor_mans_pwm.h"
 
 
-//xSemaphoreHandle wifi_alive;
-//xQueueHandle publish_queue;
-
-//void pwm_setup(void);
-
-/*
-   static void beat_task(void *pvParameters)
-   {
-   portTickType xLastWakeTime = xTaskGetTickCount();
-   char msg[PUB_MSG_LEN];
-   int count = 0;
-
-   while (1) {
-// just a fancy way of doing vTaskDelay(delay)?
-// Probably good to use for 400Hz on quadcopter
-vTaskDelayUntil(&xLastWakeTime, 10000 / portTICK_RATE_MS);
-printf("beat\r\n");
-snprintf(msg, PUB_MSG_LEN, "Beat %d\r\n", count++);
-if (xQueueSend(publish_queue, (void *)msg, 0) == pdFALSE) {
-printf("Publish queue overflow.\r\n");
-}
-}
-}*/
-
-
 void user_init(void)
 {
     uart_set_baud(0, 115200);
     rgbw_init();
-    //HW_init();
     printf("SDK version:%s\n", sdk_system_get_sdk_version());
 
     vSemaphoreCreateBinary(wifi_alive);
-    //vSemaphoreCreateBinary(pwm_sem);
-
     publish_queue = xQueueCreate(4, PUB_MSG_LEN);
 
     xTaskCreate(
