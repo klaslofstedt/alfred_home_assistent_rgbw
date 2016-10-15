@@ -187,7 +187,6 @@ void rgbw_parse_mqtt(char **data, uint8_t len)
     rgbw_calc_pwm(data_array);
 }
 
-uint16_t temp_w = 0;
 static void rgbw_calc_pwm(uint16_t *data_array)
 {
     // Not too shitty. Make a separate function for this.
@@ -196,11 +195,13 @@ static void rgbw_calc_pwm(uint16_t *data_array)
     rgbw_calc_rgb(data_array[3], &temp_r, &temp_g, &temp_b); 
 
     
+    /*
     if(temp_w != data_array[0]){
         temp_w = data_array[0];
         xSemaphoreGive(toggle_lamp);
     }
-    //lamp_g.status = (data_array[0]);
+    */
+    lamp_g.status = (data_array[0]);
     lamp_g.red = (temp_r * ((float)data_array[1] / 100) * (temp_color / 100) * lamp_g.status);
     lamp_g.green = (temp_g * ((float)data_array[1] / 100) * (temp_color / 100) * lamp_g.status);
     lamp_g.blue = (temp_b * ((float)data_array[1] / 100) * (temp_color / 100) * lamp_g.status);

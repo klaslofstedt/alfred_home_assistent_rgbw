@@ -31,6 +31,7 @@ void user_init(void)
 
     vSemaphoreCreateBinary(wifi_alive);
     vSemaphoreCreateBinary(toggle_lamp);
+    xSemaphoreTake(toggle_lamp, 1000);
 
     publish_queue = xQueueCreate(4, PUB_MSG_LEN);
 
