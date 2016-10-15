@@ -30,6 +30,8 @@ void user_init(void)
     printf("SDK version:%s\n", sdk_system_get_sdk_version());
 
     vSemaphoreCreateBinary(wifi_alive);
+    vSemaphoreCreateBinary(toggle_lamp);
+
     publish_queue = xQueueCreate(4, PUB_MSG_LEN);
 
     xTaskCreate(
@@ -46,6 +48,14 @@ void user_init(void)
             1024, 
             NULL, 
             3, 
+            NULL);
+
+    xTaskCreate(
+            &rgbw_slow_toggle_task,
+            (int8_t *)"rgbw_slow_toggle_task",
+            1024, 
+            NULL,
+            4,
             NULL);
 
     /*

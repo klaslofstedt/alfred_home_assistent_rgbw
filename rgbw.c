@@ -3,24 +3,18 @@
 #include "poor_mans_pwm.h"
 
 //#define DEBUG
-#define RED 12
-#define GREEN 13
-#define BLUE 14
-#define WHITE 16
-// REAL ONES
-/*
 #define RED 13
 #define GREEN 12
 #define BLUE 14
-*/
+#define WHITE 2
 #define SWITCH 15
 
 #define FREQENCY 0xff
 #define RESOLUTION 0xff
 #define SIZE 4
 
+
 static void rgbw_pwm_set_duty(void);
-static void rgbw_pins_init(void);
 static void rgbw_calc_rgb(uint16_t value, float *r, float *g, float *b);
 static void rgbw_calc_saturation(uint16_t value, float *color, float *white);
 static void rgbw_calc_pwm(uint16_t *data_array);
@@ -35,6 +29,31 @@ rgbw_t lamp_g = {
 
 uint8_t pwm_pin_g[] = {RED, GREEN, BLUE, WHITE};
 uint8_t pwm_duty_g[] = {0, 0, 0, 0};
+
+void rgbw_slow_toggle_task(void *pvParameters)
+{
+    while(1){
+        xSemaphoreTake(toggle_lamp, portMAX_DELAY);
+        printf("TASK\n");
+
+        if(lamp_g.status <= 0){
+            while(lamp_g.status < 1){
+                printf("status_upp: %f\n", lamp_g.status);
+                lamp_g.status = (lamp_g.status + 0.01);
+                rgbw_pwm_set_duty();
+                vTaskDelay(15 / portTICK_RATE_MS);
+            }
+        }
+        else{
+            while(lamp_g.status > 0){
+                printf("status_ner: %f\n", lamp_g.status);
+                lamp_g.status = (lamp_g.status - 0.01);
+                rgbw_pwm_set_duty();
+                vTaskDelay(15/  portTICK_RATE_MS);
+            }
+        }
+    }
+}
 
 void rainbow_task(void *delay)
 {
@@ -168,6 +187,7 @@ void rgbw_parse_mqtt(char **data, uint8_t len)
     rgbw_calc_pwm(data_array);
 }
 
+uint16_t temp_w = 0;
 static void rgbw_calc_pwm(uint16_t *data_array)
 {
     // Not too shitty. Make a separate function for this.
@@ -175,11 +195,16 @@ static void rgbw_calc_pwm(uint16_t *data_array)
     rgbw_calc_saturation(data_array[2], &temp_color, &temp_white);
     rgbw_calc_rgb(data_array[3], &temp_r, &temp_g, &temp_b); 
 
-    lamp_g.status = (data_array[0]);
-    lamp_g.red = (temp_r * ((float)data_array[1] / 100) * (temp_color / 100) * data_array[0]);
-    lamp_g.green = (temp_g * ((float)data_array[1] / 100) * (temp_color / 100) * data_array[0]);
-    lamp_g.blue = (temp_b * ((float)data_array[1] / 100) * (temp_color / 100) * data_array[0]);
-    lamp_g.white = (0xff * ((float)data_array[1] / 100) * (temp_white / 100) * data_array[0]);
+    
+    if(temp_w != data_array[0]){
+        temp_w = data_array[0];
+        xSemaphoreGive(toggle_lamp);
+    }
+    //lamp_g.status = (data_array[0]);
+    lamp_g.red = (temp_r * ((float)data_array[1] / 100) * (temp_color / 100) * lamp_g.status);
+    lamp_g.green = (temp_g * ((float)data_array[1] / 100) * (temp_color / 100) * lamp_g.status);
+    lamp_g.blue = (temp_b * ((float)data_array[1] / 100) * (temp_color / 100) * lamp_g.status);
+    lamp_g.white = (0xff * ((float)data_array[1] / 100) * (temp_white / 100) * lamp_g.status);
 #ifdef DEBUG
     printf("status%d\n", lamp_g.status);
     printf("red%d\n", lamp_g.red);
