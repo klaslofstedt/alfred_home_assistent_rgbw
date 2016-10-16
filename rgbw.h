@@ -16,9 +16,7 @@ typedef struct
     uint8_t white;
 } rgbw_t;
 
-xSemaphoreHandle toggle_lamp;
 
-void rgbw_slow_toggle_task(void *pvParameters);
 void rainbow_task(void *delay);
 void rgbw_parse_mqtt(char **data, uint8_t len);
 void rgbw_init(void);
