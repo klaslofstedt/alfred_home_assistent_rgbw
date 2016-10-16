@@ -81,3 +81,4 @@ void pmp_pwm_init(uint8_t frequency, uint8_t resolution)
     timer_set_interrupts(FRC1, true);
     timer_set_run(FRC1, true);
 }
+

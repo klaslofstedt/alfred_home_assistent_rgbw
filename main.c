@@ -16,7 +16,6 @@
 #include <paho_mqtt_c/MQTTClient.h>
 
 #include <semphr.h>
-//#include "pwm.h"
 #include "mqtt.h"
 #include "wifi.h"
 #include "rgbw.h"
@@ -48,16 +47,6 @@ void user_init(void)
             NULL, 
             3, 
             NULL);
-
-    /*
-    xTaskCreate(
-            &rgbw_task, 
-            (int8_t *)"rgbw_task", 
-            1024, 
-            NULL, 
-            4, 
-            NULL);
-            */
 
     /*
     xTaskCreate(
