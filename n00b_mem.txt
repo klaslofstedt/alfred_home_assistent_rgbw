@@ -1,0 +1,21 @@
+1. follow the instructions and install "alfred_home_assistent_webapp" on the rpi
+
+2. install mosquitto on the rpi
+- sudo apt-add-repository ppa:mosquitto-dev/mosquitto-ppa
+- sudo apt-get update
+- sudo apt-get install mosquitto
+- sudo apt-get install libmosquitto-dev
+- sudo apt-get install mosquitto-clients
+
+mosquitto is already doing it's broker stuff now!
+
+3. Listen to the broker from esp8266
+- change mqtt.h to the IP of your RPi
+
+PROFIT!
+
+EXTRA - Let your rpi start server.js on startup:
+
+4. funkar faktiskt: https://github.com/zapty/forever-service
+4. verkar funka! (nope) http://stackoverflow.com/questions/32618208/nodejs-forever-does-not-work-on-startup
+4. funkar typ men dör efter ett tag http://www.instructables.com/id/Nodejs-App-As-a-RPI-Service-boot-at-Startup/?ALLSTEPS
