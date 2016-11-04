@@ -31,11 +31,11 @@ static void rgbw_calc_saturation(uint16_t value, float *color, float *white);
 static void rgbw_calc_pwm(uint16_t *data_array);
 
 rgbw_t lamp_g = {
-    .status = 0,
+    .status = 1,
     .red = 0,
     .green = 0,
     .blue = 0,
-    .white = 0
+    .white = 255
 };
 
 
@@ -236,9 +236,11 @@ static void rgbw_pwm_set_duty(void)
 
 void rgbw_init(void)
 {
+    gpio_enable(SWITCH, GPIO_OUTPUT);
+    gpio_write(SWITCH, 1);
     // pmp - poor mans pwm
     pmp_pwm_init(FREQENCY, RESOLUTION);
     pmp_pwm_pins_init(pwm_pin_g, SIZE);
-    pmp_pwm_set_duty(pwm_duty_g, SIZE);
+    rgbw_pwm_set_duty();
 }
 
