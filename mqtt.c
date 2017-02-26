@@ -4,10 +4,11 @@
 
 void mqtt_topic_received(mqtt_message_data_t *md)
 {
-    char **ptr; // data payload
+    //char **ptr; // data payload
     int i;
     mqtt_message_t *message = md->message;
-    ptr = malloc(sizeof(char *) * (int)message->payloadlen);
+    char *ptr = malloc(sizeof(char) * (int)message->payloadlen);
+    // print ptr size
     printf("Received: ");
     for( i = 0; i < md->topic->lenstring.len; ++i){
         printf("%c", md->topic->lenstring.data[ i ]);
@@ -19,6 +20,7 @@ void mqtt_topic_received(mqtt_message_data_t *md)
     }
     printf("\n");
     rgbw_parse_mqtt(ptr, message->payloadlen);
+    // print data of ptr
     free(ptr);
 }
 

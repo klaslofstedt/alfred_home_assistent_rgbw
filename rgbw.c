@@ -1,6 +1,8 @@
 #include "rgbw.h"
 #include "math_lite.h"
 #include "poor_mans_pwm.h"
+#include <stdio.h>
+#include <FreeRTOSConfig.h>
 
 //#define DEBUG
 #define RED 13
@@ -9,48 +11,61 @@
 #define WHITE 2
 #define SWITCH 15
 
-#define FREQENCY 0xff
-#define RESOLUTION 0xff
-#define SIZE 4
+#define FREQENCY 100//0xff
+#define RESOLUTION 100//0xff
+#define SIZE 5
 
 #define SATURATION_MIN 0
 #define SATURATION_MAX 200
 #define COLOR_MAX 1530
 
-#define DIMMER_TIME_MS 18
+#define DIMMER_TIME_MS 50
 
 uint8_t pwm_pin_g[] = {RED, GREEN, BLUE, WHITE};
 uint8_t pwm_duty_g[] = {0, 0, 0, 0};
 uint16_t previous_state = 0;
 
-static void rgbw_dim_light(uint16_t *data_array);
+static void rgbw_dim_light();
 static void rgbw_set_lamp(uint8_t *c, float col, uint16_t bri, float sat, uint8_t stat);
 static void rgbw_pwm_set_duty(void);
 static void rgbw_calc_rgb(uint16_t value, float *r, float *g, float *b);
 static void rgbw_calc_saturation(uint16_t value, float *color, float *white);
-static void rgbw_calc_pwm(uint16_t *data_array);
+static void rgbw_calc_pwm();
 
 rgbw_t lamp_g = {
     .status = 1,
     .red = 0,
     .green = 0,
     .blue = 0,
-    .white = 255
+    .white = 255,
+    .random = 0,
+    .speed = 0,
+    .color = 0,
+    .saturation = 0,
+    .brightness = 0,
 };
 
 
-void rainbow_task(void *delay)
+void rainbow_task(void *delay) // don't use the in parameter
 {
-    uint16_t data_array[SIZE] = {1, 100, 200, 0};
+    //uint16_t data_array[SIZE] = {1, 100, 200, 0};
     while(1){
-#ifdef DEBUG
-        printf("color: %d\n", data_array[3]);
-#endif
-        rgbw_calc_pwm(data_array);
-        vTaskDelay(10 / portTICK_RATE_MS);
-        data_array[3]++;
-        if(data_array[3] > COLOR_MAX){
-            data_array[3] = 0;
+        if(xSemaphoreTake(random_rgb, portMAX_DELAY)){
+            //printf("take2\r\n");
+            xSemaphoreGive(random_rgb);
+            //printf("give2\r\n");
+            printf("color: %d\n", lamp_g.color);
+            rgbw_calc_pwm();
+            vTaskDelay(50 / portTICK_RATE_MS);
+            if(lamp_g.speed == 0){
+                lamp_g.color++;
+            }
+            else{
+                lamp_g.color = lamp_g.color + (2 * lamp_g.speed);
+            }
+            if(lamp_g.color> COLOR_MAX){
+                lamp_g.color= 0;
+            }
         }
     }
 }
@@ -118,17 +133,17 @@ static void rgbw_calc_saturation(uint16_t value, float *color, float *white)
     } 
 }
 
-static void rgbw_calc_pwm(uint16_t *data_array)
+static void rgbw_calc_pwm()
 {
     float temp_r = 0, temp_g = 0, temp_b = 0, temp_color = 0, temp_white = 0;
 
-    rgbw_calc_saturation(data_array[2], &temp_color, &temp_white);
-    rgbw_calc_rgb(data_array[3], &temp_r, &temp_g, &temp_b); 
+    rgbw_calc_saturation(lamp_g.saturation, &temp_color, &temp_white);
+    rgbw_calc_rgb(lamp_g.color, &temp_r, &temp_g, &temp_b); 
 
-    rgbw_set_lamp(&lamp_g.red, temp_r, data_array[1], temp_color, lamp_g.status);
-    rgbw_set_lamp(&lamp_g.green, temp_g, data_array[1], temp_color, lamp_g.status);
-    rgbw_set_lamp(&lamp_g.blue, temp_b, data_array[1], temp_color, lamp_g.status);
-    rgbw_set_lamp(&lamp_g.white, 0xff, data_array[1], temp_white, lamp_g.status);
+    rgbw_set_lamp(&lamp_g.red, temp_r, lamp_g.brightness, temp_color, lamp_g.status);
+    rgbw_set_lamp(&lamp_g.green, temp_g, lamp_g.brightness, temp_color, lamp_g.status);
+    rgbw_set_lamp(&lamp_g.blue, temp_b, lamp_g.brightness, temp_color, lamp_g.status);
+    rgbw_set_lamp(&lamp_g.white, 0xff, lamp_g.brightness, temp_white, lamp_g.status);
 
 #ifdef DEBUG
     printf("status%d\n", lamp_g.status);
@@ -141,35 +156,38 @@ static void rgbw_calc_pwm(uint16_t *data_array)
     rgbw_pwm_set_duty();
 }
 
-static void rgbw_dim_light(uint16_t *data_array)
+static void rgbw_dim_light()
 {
-    uint16_t temp_brightness = data_array[1];
+    uint8_t temp_brightness = lamp_g.brightness;
     if(previous_state == 0){
         lamp_g.status = 1;
         previous_state = 1;
-        data_array[1] = 0;
-        while(data_array[1] < temp_brightness){
-            data_array[1] = (data_array[1] + 1);
+        lamp_g.brightness = 0;
+        while(lamp_g.brightness < temp_brightness){
+            lamp_g.brightness = lamp_g.brightness + 2;
 #ifdef DEBUG
-            printf("upp data_array[1]: %d\n", data_array[1]);
+            printf("upp brightness: %d\n", lamp_g.brightness);
 #endif
-            rgbw_calc_pwm(data_array);
+            rgbw_calc_pwm();
             vTaskDelay(DIMMER_TIME_MS / portTICK_RATE_MS);
         }
     }
     else{
         lamp_g.status = 1;
         previous_state = 0;
-        while(data_array[1] > 0){
-            data_array[1] = (data_array[1] - 1);
+        while(lamp_g.brightness > 0){
+            lamp_g.brightness = (lamp_g.brightness - 2);
+            if(lamp_g.brightness < 0){
+                lamp_g.brightness = 0;
+            }
 #ifdef DEBUG
-            printf("ner data_array[1]: %d\n", data_array[1]);
+            printf("ner brightness: %d\n",lamp_g.brightness);
 #endif
-            rgbw_calc_pwm(data_array);
+            rgbw_calc_pwm();
             vTaskDelay(DIMMER_TIME_MS / portTICK_RATE_MS);
         }
         lamp_g.status = 0;
-        rgbw_calc_pwm(data_array);
+        rgbw_calc_pwm();
     }
 }
 
@@ -183,9 +201,15 @@ static void rgbw_dim_light(uint16_t *data_array)
  * z = saturation (0 - 200)
  * w = color (0 - 1530)
  ****************************************/
-void rgbw_parse_mqtt(char **data, uint8_t len)
+void rgbw_parse_mqtt(char *data, uint8_t len)
 {
-    // Totally fucking shit code. Rewrite
+    printf("len: %d\n", len);
+    int n;
+    printf("data[n]: ");
+    for(n = 0; n < len; n++){
+        printf(" %c", data[n]);
+    }
+    printf("\n");
     uint8_t i;
     uint8_t array_size = SIZE;
     char char_num_arr[SIZE] = {0};
@@ -193,11 +217,13 @@ void rgbw_parse_mqtt(char **data, uint8_t len)
     uint8_t num_lenght = 0;
     uint8_t arr_ptr = 0;
     uint8_t arr_ptr_copy = 0;
+    printf("char_num_arr: ");
     for(i = 0; i < array_size; i++){
         arr_ptr = arr_ptr_copy;
         uint8_t j = 0;
         for(j = arr_ptr; data[j] != ':' && j < len; j++){
             char_num_arr[j - arr_ptr] = data[j];
+            printf(" %c", char_num_arr[j - arr_ptr]);
             num_lenght++;
             arr_ptr_copy++;
         }
@@ -208,18 +234,63 @@ void rgbw_parse_mqtt(char **data, uint8_t len)
             uint16_t number = (power(10, num_lenght -1) * (char_num_arr[j] - '0'));
             num_lenght--;
             data_array[i] += number;
+            //printf("array: %d", data_array[i]);
         }
     }
-#ifdef DEBUG
+    printf("\n");
+    printf("data_array[i]: ");
     for(i = 0; i < array_size; i++){
-        printf("data_array%d\n", data_array[i]);
+        printf(" %d", data_array[i]);
     }
-#endif
-    if(previous_state == data_array[0]){
-        rgbw_calc_pwm(data_array);
+    printf("\n");
+    // Here we check if the random task should start or not.
+    if(data_array[0] == 0){
+        lamp_g.status = 0;
+        lamp_g.random = 0;
+    }
+    if(data_array[0] == 1){
+        lamp_g.status =  1;
+        lamp_g.random = 0;
+    }
+    if(data_array[0] == 2){
+        lamp_g.status = 0;
+        lamp_g.random = 2;
+    }
+    if(data_array[0] == 3){
+        lamp_g.status = 1;
+        lamp_g.random = 2;
+    }
+    lamp_g.brightness = data_array[1];
+    lamp_g.saturation = data_array[2];
+    lamp_g.color = data_array[3];
+    lamp_g.speed = data_array[4];
+
+    /*if(previous_state == 0 || lamp_g.status == 0){
+        rgbw_dim_light();
+    }*/
+
+    /*if(previous_state == status){
+      rgbw_calc_pwm(data_array);
+      if(random == 2){
+      xSemaphoreGive(random_rgb);
+      printf("give1\r\n");
+      }
+      else{
+      xSemaphoreTake(random_rgb, 1);
+      printf("take1\r\n");
+      }
+      }
+      else{
+      rgbw_dim_light(data_array);
+      }*/
+    if(lamp_g.random == 2){
+        xSemaphoreGive(random_rgb);
+        printf("give1\r\n");
     }
     else{
-        rgbw_dim_light(&data_array);
+        xSemaphoreTake(random_rgb, 1);
+        rgbw_calc_pwm();
+        printf("take1\r\n");
     }
 }
 

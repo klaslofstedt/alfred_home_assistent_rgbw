@@ -29,6 +29,9 @@ void user_init(void)
     printf("SDK version:%s\n", sdk_system_get_sdk_version());
 
     vSemaphoreCreateBinary(wifi_alive);
+    vSemaphoreCreateBinary(random_rgb);
+    // Initialize random_rgb as 0 to not kickstart the rainbow_task on boot
+    xSemaphoreTake(random_rgb, 1);
 
     publish_queue = xQueueCreate(4, PUB_MSG_LEN);
 
@@ -48,13 +51,11 @@ void user_init(void)
             3, 
             NULL);
 
-    /*
     xTaskCreate(
             &rainbow_task,
             (int8_t *)"rainbow_task",
             256,
             NULL,
-            4,
+            3,
             NULL);
-            */
 }
