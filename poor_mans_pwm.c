@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <stdio.h>
 #include "poor_mans_pwm.h"
 
 /* Poor mans PWM
@@ -38,9 +39,24 @@ static void pmp_pwm_pins_update(void)
         pmp_pwm_set(pmp_pwm_pins_g[i], pmp_pwm_duty_g[i]);
     }
 } 
-
+uint8_t toggle = 0;
 static void frc1_interrupt_handler(void)
 {
+    /*
+       uint32_t ticks = 0, prev_ticks = 0;
+       ticks = xTaskGetTickCountFromISR();
+       printf("ticks: %d\n\r", ticks - prev_ticks);
+       prev_ticks = ticks;
+       */
+    /*if(toggle == 1){
+        gpio_write(16, toggle);
+        toggle = 0;
+    }
+    else{
+        gpio_write(16, toggle);
+        toggle = 1;
+    }*/
+
     frc1_interrupt_count_g++;
     pmp_pwm_pins_update();
 }
@@ -65,6 +81,7 @@ void pmp_pwm_pins_init(uint8_t *pins, uint8_t size)
         pmp_pwm_pins_g[i] = pins[i];
         pmp_pwm_duty_g[i] = 0;
     }
+    gpio_enable(16, GPIO_OUTPUT);
 }
 
 void pmp_pwm_init(uint8_t frequency, uint8_t resolution)

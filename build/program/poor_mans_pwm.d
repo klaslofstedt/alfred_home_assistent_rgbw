@@ -16,6 +16,10 @@ build/program//poor_mans_pwm.o: \
  ../../libc/xtensa-lx106-elf/include/sys/cdefs.h \
  ../../libc/xtensa-lx106-elf/include/machine/stdlib.h \
  ../../libc/xtensa-lx106-elf/include/alloca.h \
+ ../../libc/xtensa-lx106-elf/include/stdio.h \
+ ../../libc/xtensa-lx106-elf/include/sys/types.h \
+ ../../libc/xtensa-lx106-elf/include/machine/types.h \
+ ../../libc/xtensa-lx106-elf/include/sys/stdio.h \
  /home/klas/Workspace/Embedded/esp-open-rtos/examples/alfred_rgbw/poor_mans_pwm.h \
  ../../libc/xtensa-lx106-elf/include/stdint.h \
  ../../libc/xtensa-lx106-elf/include/sys/_intsup.h \
