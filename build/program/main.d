@@ -90,4 +90,5 @@ build/program//main.o: \
  /home/klas/Workspace/Embedded/esp-open-rtos/examples/alfred_rgbw/math_lite.h \
  /home/klas/Workspace/Embedded/esp-open-rtos/examples/alfred_rgbw/wifi.h \
  /home/klas/Workspace/Embedded/esp-open-rtos/examples/alfred_rgbw/rgbw.h \
- /home/klas/Workspace/Embedded/esp-open-rtos/examples/alfred_rgbw/poor_mans_pwm.h
+ /home/klas/Workspace/Embedded/esp-open-rtos/examples/alfred_rgbw/poor_mans_pwm.h \
+ /home/klas/Workspace/Embedded/esp-open-rtos/examples/alfred_rgbw/jsmn.h

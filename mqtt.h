@@ -29,7 +29,10 @@
 xQueueHandle publish_queue;
 
 
-void mqtt_topic_received(mqtt_message_data_t *md);
+void mqtt_status(mqtt_message_data_t *md);
+void mqtt_color(mqtt_message_data_t *md);
+void mqtt_brightness(mqtt_message_data_t *md);
+void mqtt_saturation(mqtt_message_data_t *md);
 const char *mqtt_get_my_id(void);
 void mqtt_task(void *pvParameters);
 void mqtt_message_process(char **data, uint8_t len);

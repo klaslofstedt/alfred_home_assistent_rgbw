@@ -1,29 +1,76 @@
 #include "mqtt.h"
 #include "wifi.h"
 #include "rgbw.h"
+// json
+/*#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include "jsmn.h"
+*/
 
-void mqtt_topic_received(mqtt_message_data_t *md)
+#define RED 13
+#define GREEN 12
+#define BLUE 14
+#define WHITE 2
+#define SWITCH 15
+
+#define FREQENCY 100//0xff
+#define RESOLUTION 100//0xff
+#define SIZE 5
+
+#define SATURATION_MIN 0
+#define SATURATION_MAX 200
+#define COLOR_MAX 1530
+
+#define DIMMER_TIME_MS 50
+/*
+static int jsoneq(const char *json, jsmntok_t *tok, const char *s) {
+    if (tok->type == JSMN_STRING && (int) strlen(s) == tok->end - tok->start &&
+            strncmp(json + tok->start, s, tok->end - tok->start) == 0) {
+        return 0;
+    }
+    return -1;
+}
+*/
+
+
+void mqtt_status(mqtt_message_data_t *md)
 {
-    //char **ptr; // data payload
     int i;
     mqtt_message_t *message = md->message;
-    char *ptr = malloc(sizeof(char) * (int)message->payloadlen);
+    char *JSON_STRING = malloc(sizeof(char) * (int)message->payloadlen);
     // print ptr size
+    /*
     printf("Received: ");
     for( i = 0; i < md->topic->lenstring.len; ++i){
         printf("%c", md->topic->lenstring.data[ i ]);
     }
     printf("\nRaw char array: ");
+    */
     for( i = 0; i < (int)message->payloadlen; ++i){
-        ptr[i] = ((char *)(message->payload))[i];
-        printf("%c", ptr[i]);
+        JSON_STRING[i] = ((char *)(message->payload))[i];
+        //printf("%c", JSON_STRING[i]);
     }
-    printf("\n");
-    rgbw_parse_mqtt(ptr, message->payloadlen);
-    // print data of ptr
-    free(ptr);
+    //printf("\n");
+    uint16_t data = atoi(JSON_STRING);
+    printf("Status: %d\n", data);
+
+    free(JSON_STRING);
+
+    gpio_enable(SWITCH, GPIO_OUTPUT);
+    gpio_write(SWITCH, data);
 }
 
+
+void mqtt_color(mqtt_message_data_t *md)
+{
+}
+void mqtt_brightness(mqtt_message_data_t *md)
+{
+}
+void mqtt_saturation(mqtt_message_data_t *md)
+{
+}
 
 const char *mqtt_get_my_id(void)
 {
@@ -96,8 +143,11 @@ void mqtt_task(void *pvParameters)
             continue;
         }
         printf("done\r\n");
-        mqtt_subscribe(&client, "rgbw/1", MQTT_QOS1, mqtt_topic_received);
-        printf("start_pwm\n");
+        mqtt_subscribe(&client, "rgbw/1/status", MQTT_QOS1, mqtt_status);
+        mqtt_subscribe(&client, "rgbw/1/color", MQTT_QOS1, mqtt_color);
+        mqtt_subscribe(&client, "rgbw/1/brightness", MQTT_QOS1, mqtt_brightness);
+        mqtt_subscribe(&client, "rgbw/1/saturation", MQTT_QOS1, mqtt_saturation);
+        //printf("start_pwm\n");
         //xSemaphoreGive(start_pwm); 
         xQueueReset(publish_queue);
 

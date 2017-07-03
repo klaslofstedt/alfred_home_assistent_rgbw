@@ -4,6 +4,9 @@
 #include "esp/uart.h"
 
 #include <string.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 #include <FreeRTOS.h>
 #include <task.h>
@@ -20,12 +23,13 @@
 #include "wifi.h"
 #include "rgbw.h"
 #include "poor_mans_pwm.h"
+#include "jsmn.h"
 
 
 void user_init(void)
 {
     uart_set_baud(0, 115200);
-    rgbw_init();
+    //rgbw_init();
     printf("SDK version:%s\n", sdk_system_get_sdk_version());
 
     vSemaphoreCreateBinary(wifi_alive);
@@ -36,19 +40,19 @@ void user_init(void)
     publish_queue = xQueueCreate(4, PUB_MSG_LEN);
 
     xTaskCreate(
-            &wifi_task, 
-            (int8_t *)"wifi_task", 
-            256, 
-            NULL, 
-            2, 
+            &wifi_task,
+            (int8_t *)"wifi_task",
+            256,
+            NULL,
+            2,
             NULL);
 
     xTaskCreate(
-            &mqtt_task, 
-            (int8_t *)"mqtt_task", 
-            1024, 
-            NULL, 
-            3, 
+            &mqtt_task,
+            (int8_t *)"mqtt_task",
+            1024,
+            NULL,
+            3,
             NULL);
 
     xTaskCreate(
