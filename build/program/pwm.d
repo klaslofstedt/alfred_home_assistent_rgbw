@@ -1,11 +1,11 @@
-build/program//main.o: \
- /home/klas/Workspace/Embedded/esp-open-rtos/examples/alfred_rgbw/main.c \
- ../../include/espressif/esp_common.h \
+build/program//pwm.o: \
+ /home/klas/Workspace/Embedded/esp-open-rtos/examples/alfred_rgbw/pwm.c \
+ /home/klas/Workspace/Embedded/esp-open-rtos/examples/alfred_rgbw/pwm.h \
  ../../libc/xtensa-lx106-elf/include/stdint.h \
  ../../libc/xtensa-lx106-elf/include/machine/_default_types.h \
  ../../libc/xtensa-lx106-elf/include/sys/features.h \
  ../../libc/xtensa-lx106-elf/include/sys/_intsup.h \
- ../../include/espressif/esp_misc.h \
+ ../../include/espressif/esp_common.h ../../include/espressif/esp_misc.h \
  ../../lwip/lwip/src/include/ipv4/lwip/ip_addr.h \
  ../../lwip/lwip/src/include/lwip/opt.h ../../lwip/include/lwipopts.h \
  ../../lwip/lwip/src/include/lwip/debug.h \
@@ -44,23 +44,20 @@ build/program//main.o: \
  ../../include/espressif/esp8266/timer_register.h \
  ../../include/espressif/esp8266/uart_register.h \
  ../../include/espressif/spi_flash.h ../../core/include/flashchip.h \
- ../../core/include/esp/uart.h ../../core/include/esp/types.h \
- ../../core/include/esp/uart_regs.h ../../core/include/common_macros.h \
- ../../core/include/esp/clocks.h \
- ../../libc/xtensa-lx106-elf/include/string.h \
- ../../libc/xtensa-lx106-elf/include/sys/string.h \
  ../../FreeRTOS/Source/include/FreeRTOS.h \
  ../../FreeRTOS/Source/include/projdefs.h \
  ../../FreeRTOS/Source/include/FreeRTOSConfig.h \
  ../../FreeRTOS/Source/include/portable.h \
  ../../FreeRTOS/Source/portable/esp8266/portmacro.h \
  ../../core/include/esp8266.h ../../core/include/common_macros.h \
- ../../core/include/esp/registers.h ../../core/include/esp/dport_regs.h \
+ ../../core/include/esp/registers.h ../../core/include/common_macros.h \
+ ../../core/include/esp/types.h ../../core/include/esp/dport_regs.h \
  ../../core/include/esp/gpio_regs.h ../../core/include/esp/i2s_regs.h \
  ../../core/include/esp/iomux_regs.h ../../core/include/esp/rtc_regs.h \
  ../../core/include/esp/rtcmem_regs.h ../../core/include/esp/slc_regs.h \
  ../../core/include/esp/spi_regs.h ../../core/include/esp/timer_regs.h \
- ../../core/include/esp/wdt_regs.h ../../core/include/esp/interrupts.h \
+ ../../core/include/esp/wdt_regs.h ../../core/include/esp/uart_regs.h \
+ ../../core/include/esp/interrupts.h \
  ../../FreeRTOS/Source/portable/esp8266/xtruntime.h \
  ../../core/include/esp/iomux.h ../../core/include/esp/gpio.h \
  ../../core/include/esp/iomux.h ../../core/include/esp/interrupts.h \
@@ -70,25 +67,4 @@ build/program//main.o: \
  ../../FreeRTOS/Source/portable/esp8266/xtensa_rtos.h \
  ../../FreeRTOS/Source/portable/esp8266/xtensa_context.h \
  ../../FreeRTOS/Source/portable/esp8266/xtensa_timer.h \
- ../../FreeRTOS/Source/include/mpu_wrappers.h \
- ../../FreeRTOS/Source/include/task.h \
- ../../FreeRTOS/Source/include/list.h ../../include/ssid_config.h \
- ../../include/espressif/esp_sta.h ../../include/espressif/esp_wifi.h \
- ../../extras/paho_mqtt_c/../paho_mqtt_c/MQTTESP8266.h \
- ../../extras/paho_mqtt_c/../paho_mqtt_c/MQTTClient.h \
- ../../extras/paho_mqtt_c/../paho_mqtt_c/MQTTPacket.h \
- ../../extras/paho_mqtt_c/../paho_mqtt_c/MQTTConnect.h \
- ../../extras/paho_mqtt_c/../paho_mqtt_c/MQTTPublish.h \
- ../../extras/paho_mqtt_c/../paho_mqtt_c/MQTTSubscribe.h \
- ../../extras/paho_mqtt_c/../paho_mqtt_c/MQTTUnsubscribe.h \
- ../../extras/paho_mqtt_c/../paho_mqtt_c/MQTTFormat.h \
- ../../extras/paho_mqtt_c/../paho_mqtt_c/StackTrace.h \
- ../../extras/paho_mqtt_c/../paho_mqtt_c/MQTTESP8266.h \
- ../../FreeRTOS/Source/include/semphr.h \
- ../../FreeRTOS/Source/include/queue.h \
- /home/klas/Workspace/Embedded/esp-open-rtos/examples/alfred_rgbw/mqtt.h \
- /home/klas/Workspace/Embedded/esp-open-rtos/examples/alfred_rgbw/math_lite.h \
- /home/klas/Workspace/Embedded/esp-open-rtos/examples/alfred_rgbw/wifi.h \
- /home/klas/Workspace/Embedded/esp-open-rtos/examples/alfred_rgbw/rgbw.h \
- /home/klas/Workspace/Embedded/esp-open-rtos/examples/alfred_rgbw/poor_mans_pwm.h \
- /home/klas/Workspace/Embedded/esp-open-rtos/examples/alfred_rgbw/pwm.h
+ ../../FreeRTOS/Source/include/mpu_wrappers.h

@@ -6,7 +6,7 @@
 #include <task.h>
 #include <semphr.h>
 
-void pmp_pwm_set_duty(uint8_t *temp, uint8_t size);
+void pmp_pwm_set_duty(uint8_t *duty, uint8_t size);
 void pmp_pwm_pins_init(uint8_t *pins, uint8_t size);
-void pmp_pwm_init(uint8_t frequency, uint8_t resolution);
+void pmp_pwm_init(uint16_t frequency, uint8_t resolution);
 #endif

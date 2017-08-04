@@ -1,75 +1,88 @@
 #include "mqtt.h"
 #include "wifi.h"
 #include "rgbw.h"
-// json
-/*#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include "jsmn.h"
-*/
-
-#define RED 13
-#define GREEN 12
-#define BLUE 14
-#define WHITE 2
-#define SWITCH 15
-
-#define FREQENCY 100//0xff
-#define RESOLUTION 100//0xff
-#define SIZE 5
-
-#define SATURATION_MIN 0
-#define SATURATION_MAX 200
-#define COLOR_MAX 1530
-
-#define DIMMER_TIME_MS 50
-/*
-static int jsoneq(const char *json, jsmntok_t *tok, const char *s) {
-    if (tok->type == JSMN_STRING && (int) strlen(s) == tok->end - tok->start &&
-            strncmp(json + tok->start, s, tok->end - tok->start) == 0) {
-        return 0;
-    }
-    return -1;
-}
-*/
+#include "pwm.h"
 
 
 void mqtt_status(mqtt_message_data_t *md)
 {
     int i;
     mqtt_message_t *message = md->message;
-    char *JSON_STRING = malloc(sizeof(char) * (int)message->payloadlen);
-    // print ptr size
-    /*
-    printf("Received: ");
-    for( i = 0; i < md->topic->lenstring.len; ++i){
-        printf("%c", md->topic->lenstring.data[ i ]);
-    }
-    printf("\nRaw char array: ");
-    */
+    char *mqtt_payload = malloc(sizeof(char) * (int)message->payloadlen);
+    printf("mqtt_status: ");
     for( i = 0; i < (int)message->payloadlen; ++i){
-        JSON_STRING[i] = ((char *)(message->payload))[i];
-        //printf("%c", JSON_STRING[i]);
+        mqtt_payload[i] = ((char *)(message->payload))[i];
+        printf("%c", mqtt_payload[i]);
     }
-    //printf("\n");
-    uint16_t data = atoi(JSON_STRING);
-    printf("Status: %d\n", data);
+    printf("\n");
+    uint8_t status = atoi(mqtt_payload);
+    //printf("Status: %d\n", data);
 
-    free(JSON_STRING);
+    free(mqtt_payload);
 
-    gpio_enable(SWITCH, GPIO_OUTPUT);
-    gpio_write(SWITCH, data);
+    //lamp.status = data;
+
+    rgbw_status(status);
+    rgbw_start_lamp();
 }
 
 
 void mqtt_color(mqtt_message_data_t *md)
 {
+    int i;
+    mqtt_message_t *message = md->message;
+    char *mqtt_payload = malloc(sizeof(char) * (int)message->payloadlen);
+    printf("mqtt_color: ");
+    for( i = 0; i < (int)message->payloadlen; ++i){
+        mqtt_payload[i] = ((char *)(message->payload))[i];
+        printf("%c", mqtt_payload[i]);
+    }
+    printf("\n");
+    uint16_t color = atoi(mqtt_payload);
+
+    free(mqtt_payload);
+
+    //lamp.color = color;
+    rgbw_color(color);
+    rgbw_start_lamp();
 }
+
+
 void mqtt_brightness(mqtt_message_data_t *md)
 {
+    int i;
+    mqtt_message_t *message = md->message;
+    char *mqtt_payload = malloc(sizeof(char) * (int)message->payloadlen);
+    printf("mqtt_brightness: ");
+    for( i = 0; i < (int)message->payloadlen; ++i){
+        mqtt_payload[i] = ((char *)(message->payload))[i];
+        printf("%c", mqtt_payload[i]);
+    }
+    printf("\n");
+    uint8_t brightness = atoi(mqtt_payload);
+
+    free(mqtt_payload);
+    rgbw_brightness(brightness);
+    rgbw_start_lamp();
 }
+
+
 void mqtt_saturation(mqtt_message_data_t *md)
 {
+    int i;
+    mqtt_message_t *message = md->message;
+    char *mqtt_payload = malloc(sizeof(char) * (int)message->payloadlen);
+    printf("mqtt_saturation: ");
+    for( i = 0; i < (int)message->payloadlen; ++i){
+        mqtt_payload[i] = ((char *)(message->payload))[i];
+        printf("%c", mqtt_payload[i]);
+    }
+    printf("\n");
+    uint8_t saturation = atoi(mqtt_payload);
+
+    free(mqtt_payload);
+    rgbw_saturation(saturation);
+    rgbw_start_lamp();
 }
 
 const char *mqtt_get_my_id(void)
@@ -99,6 +112,7 @@ const char *mqtt_get_my_id(void)
 
 void mqtt_task(void *pvParameters)
 {
+    // mqtt
     int ret = 0;
     struct mqtt_network network;
     mqtt_client_t client   = mqtt_client_default;
@@ -148,7 +162,7 @@ void mqtt_task(void *pvParameters)
         mqtt_subscribe(&client, "rgbw/1/brightness", MQTT_QOS1, mqtt_brightness);
         mqtt_subscribe(&client, "rgbw/1/saturation", MQTT_QOS1, mqtt_saturation);
         //printf("start_pwm\n");
-        //xSemaphoreGive(start_pwm); 
+        //xSemaphoreGive(start_pwm);
         xQueueReset(publish_queue);
 
         while(1){
@@ -156,14 +170,14 @@ void mqtt_task(void *pvParameters)
             char msg[PUB_MSG_LEN - 1] = "\0";
             while(xQueueReceive(publish_queue, (void *)msg, 0) ==
                     pdTRUE){
-                printf("got message to publish\r\n");
+                printf("heartbeat\r\n");
                 mqtt_message_t message;
                 message.payload = msg;
                 message.payloadlen = PUB_MSG_LEN;
                 message.dup = 0;
                 message.qos = MQTT_QOS1;
                 message.retained = 0;
-                ret = mqtt_publish(&client, "mqtt msg: ", &message);
+                ret = mqtt_publish(&client, "rgbw/1/heartbeat", &message);
                 if (ret != MQTT_SUCCESS ){
                     printf("error while publishing message: %d\n", ret );
                     break;
@@ -177,5 +191,25 @@ void mqtt_task(void *pvParameters)
         printf("Connection dropped, request restart\n\r");
         mqtt_network_disconnect(&network);
         taskYIELD();
+    }
+}
+
+void heartbeat_task(void *pvParameters)
+{
+    portTickType xLastWakeTime = xTaskGetTickCount();
+    char msg[PUB_MSG_LEN];
+    int count = 0;
+    // Delay in order to make sure the server misses a heartbeat so the saved data can be sent (server)
+    // and received (esp8266) again.
+    vTaskDelay(20000 / portTICK_RATE_MS);
+    xQueueReset(publish_queue);
+
+    while (1) {
+        vTaskDelayUntil(&xLastWakeTime, 5000 / portTICK_RATE_MS);
+        //printf("beat\r\n");
+        snprintf(msg, PUB_MSG_LEN, "Beat %d\r\n", count++);
+        if (xQueueSend(publish_queue, (void *)msg, 0) == pdFALSE) {
+            printf("Publish queue overflow.\r\n");
+        }
     }
 }

@@ -19,6 +19,7 @@
 #include <semphr.h>
 
 xSemaphoreHandle wifi_alive;
+
 void wifi_task(void *pvParameters);
 
 #endif
