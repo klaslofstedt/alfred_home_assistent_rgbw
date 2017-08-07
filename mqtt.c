@@ -4,15 +4,14 @@
 
 #include "mqtt.h"
 #include "wifi.h"
-//#include "rgbw.h"
-#include "pwm.h"
+#include "rgbw.h"
 
 //UBaseType_t stack_size_mqtt;
 //UBaseType_t stack_size_heartbeat;
 
 
 
-
+/*
 SemaphoreHandle_t sem_mqtt_new = NULL;
 SemaphoreHandle_t sem_activate_rainbow = NULL;
 
@@ -23,7 +22,7 @@ QueueHandle_t queue_mqtt_brightness = 0;
 
 QueueHandle_t queue_mqtt_rainbow = 0;
 QueueHandle_t queue_mqtt_speed = 0;
-
+*/
 
 
 void mqtt_status(mqtt_message_data_t *md)
@@ -42,10 +41,12 @@ void mqtt_status(mqtt_message_data_t *md)
 
     free(mqtt_payload);
 
-    xQueueOverwrite(queue_mqtt_status, &status);
-    xSemaphoreGive(sem_mqtt_new);
-    //rgbw_status(status);
-    //rgbw_start_lamp();
+    //xQueueOverwrite(queue_mqtt_status, &status);
+    //xSemaphoreGive(sem_mqtt_new);
+    //gpio_write(12, status);
+    rgbw_status(status);
+
+    rgbw_start_lamp();
 }
 
 
@@ -62,12 +63,19 @@ void mqtt_color(mqtt_message_data_t *md)
     printf("\n");
     uint16_t color = atoi(mqtt_payload);
 
-    free(mqtt_payload);
 
-    xQueueOverwrite(queue_mqtt_color, &color);
-    xSemaphoreGive(sem_mqtt_new);
-    //rgbw_color(color);
-    //rgbw_start_lamp();
+    free(mqtt_payload);
+    /*if(color > 700){
+    gpio_write(2, 1);
+    }
+    else{
+      gpio_write(2, 0);
+    }*/
+    //xQueueOverwrite(queue_mqtt_color, &color);
+    //xSemaphoreGive(sem_mqtt_new);
+
+    rgbw_color(color);
+    rgbw_start_lamp();
 }
 
 
@@ -85,11 +93,13 @@ void mqtt_brightness(mqtt_message_data_t *md)
     uint8_t brightness = atoi(mqtt_payload);
 
     free(mqtt_payload);
+    //gpio_write(14, brightness);
 
-    xQueueOverwrite(queue_mqtt_brightness, &brightness);
-    xSemaphoreGive(sem_mqtt_new);
-    //rgbw_brightness(brightness);
-    //rgbw_start_lamp();
+    //xQueueOverwrite(queue_mqtt_brightness, &brightness);
+    //xSemaphoreGive(sem_mqtt_new);
+
+    rgbw_brightness(brightness);
+    rgbw_start_lamp();
 }
 
 
@@ -108,11 +118,15 @@ void mqtt_saturation(mqtt_message_data_t *md)
 
     free(mqtt_payload);
 
-    xQueueOverwrite(queue_mqtt_saturation, &saturation);
-    xSemaphoreGive(sem_mqtt_new);
+    //gpio_write(14, saturation);
+    //xQueueOverwrite(queue_mqtt_saturation, &saturation);
+    //xSemaphoreGive(sem_mqtt_new);
+
+    rgbw_saturation(saturation);
+    rgbw_start_lamp();
 }
 
-void mqtt_speed(mqtt_message_data_t *md)
+/*void mqtt_speed(mqtt_message_data_t *md)
 {
     int i;
     mqtt_message_t *message = md->message;
@@ -127,11 +141,14 @@ void mqtt_speed(mqtt_message_data_t *md)
 
     free(mqtt_payload);
 
-    xQueueOverwrite(queue_mqtt_speed, &speed);
-    xSemaphoreGive(sem_mqtt_new);
-}
+    //xQueueOverwrite(queue_mqtt_speed, &speed);
+    //xSemaphoreGive(sem_mqtt_new);
 
-void mqtt_rainbow(mqtt_message_data_t *md)
+    //rgbw_speed(speed);
+    //rgbw_start_lamp();
+}*/
+
+/*void mqtt_rainbow(mqtt_message_data_t *md)
 {
     int i;
     mqtt_message_t *message = md->message;
@@ -146,9 +163,10 @@ void mqtt_rainbow(mqtt_message_data_t *md)
 
     free(mqtt_payload);
 
-    xQueueOverwrite(queue_mqtt_rainbow, &rainbow);
-    xSemaphoreGive(sem_mqtt_new);
-}
+    //xQueueOverwrite(queue_mqtt_rainbow, &rainbow);
+    //xSemaphoreGive(sem_mqtt_new);
+}*/
+
 
 const char *mqtt_get_my_id(void)
 {
@@ -193,8 +211,8 @@ void mqtt_task(void *pvParameters)
 
 
 
-    vSemaphoreCreateBinary(sem_mqtt_new);
-    xSemaphoreTake(sem_mqtt_new, 1);
+    //vSemaphoreCreateBinary(sem_mqtt_new);
+    //xSemaphoreTake(sem_mqtt_new, 1);
 
 
     while(1) {
@@ -234,7 +252,7 @@ void mqtt_task(void *pvParameters)
         mqtt_subscribe(&client, "rgbw/1/brightness", MQTT_QOS1, mqtt_brightness);
         mqtt_subscribe(&client, "rgbw/1/saturation", MQTT_QOS1, mqtt_saturation);
         //mqtt_subscribe(&client, "rgbw/1/rainbow", MQTT_QOS1, mqtt_rainbow);
-        mqtt_subscribe(&client, "rgbw/1/speed", MQTT_QOS1, mqtt_speed);
+        //mqtt_subscribe(&client, "rgbw/1/speed", MQTT_QOS1, mqtt_speed);
 
         //printf("start_pwm\n");
         //xSemaphoreGive(start_pwm);

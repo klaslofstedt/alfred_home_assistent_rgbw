@@ -1,6 +1,6 @@
 #include "wifi.h"
 
-UBaseType_t stack_size_wifi;
+//UBaseType_t stack_size_wifi;
 
 void wifi_task(void *pvParameters)
 {

@@ -1,5 +1,5 @@
 #include "rgbw.h"
-#include "mqtt.h"
+//#include "mqtt.h"
 #include "math_lite.h"
 #include "poor_mans_pwm.h"
 #include <stdio.h>
@@ -22,19 +22,19 @@
 
 #define DIMMER_TIME_MS 30
 
-uint8_t pwm_pin_g[] = {RED, GREEN, BLUE, WHITE};
-uint8_t pwm_duty_g[] = {0, 0, 0, 0};
+static uint8_t pwm_pin_g[] = {RED, GREEN, BLUE, WHITE};
+static uint8_t pwm_duty_g[] = {0, 0, 0, 0};
 
-uint8_t prev_status = 0;
-uint8_t prev_brightness = 0;
-uint8_t prev_saturation = 0;
-uint16_t prev_rgb = 0;
+//uint8_t prev_status = 0;
+//uint8_t prev_brightness = 0;
+//uint8_t prev_saturation = 0;
+//uint16_t prev_rgb = 0;
 
-UBaseType_t stack_size_rgbw;
+//UBaseType_t stack_size_rgbw;
 
 
 static void rgbw_calc_rgb(int32_t value);
-static void rgbw_calc_saturation(int32_t value);
+static void rgbw_calc_saturation(uint8_t value);
 static void rgbw_corner_case();
 
 //static void constrain8(uint8_t *in, uint8_t min, uint8_t max);
@@ -82,7 +82,7 @@ void constrain32(int32_t *in, int32_t min, int32_t max)
     }
 }
 
-/*void rgbw_status(uint8_t value)
+void rgbw_status(uint8_t value)
 {
     lamp_g.status = value;
 }
@@ -100,12 +100,12 @@ void rgbw_brightness(uint8_t value)
 void rgbw_saturation(uint8_t value)
 {
     lamp_g.saturation = value;
-}*/
+}
 
-static void rgbw_calc_saturation(int32_t value)
+/*static void rgbw_calc_saturation(uint8_t value)
 {
     int32_t temp = 0;
-    constrain32(&value, 0, 200);
+    //constrain32(&value, 0, 200);
     if((float)value >= SATURATION_MIN && (float)value <= SATURATION_MAX / 2){
         lamp_g.white = SATURATION_MAX / 2;
         lamp_g.color = (float)value;
@@ -124,11 +124,11 @@ static void rgbw_calc_saturation(int32_t value)
     temp = (int32_t)lamp_g.white;
     constrain32(&temp, 0, 100);
     lamp_g.white = (uint8_t)temp;
-    //printf("color: %d\n", lamp_g.color);
-    //printf("white: %d\n", lamp_g.white);
-}
+    //printf("color1: %d\n", lamp_g.color);
+    //printf("white1: %d\n", lamp_g.white);
+}*/
 
-void rgbw_calc_rgb(int32_t value)
+/*void rgbw_calc_rgb(int32_t value)
 {
     int32_t temp;
     constrain32(&value, 0, 1530);
@@ -177,12 +177,12 @@ void rgbw_calc_rgb(int32_t value)
     constrain32(&temp, 0, 0xff);
     lamp_g.blue = (uint8_t)temp;
 
-    /*printf("red: %d\n", lamp_g.red);
-    printf("green: %d\n", lamp_g.green);
-    printf("blue: %d\n", lamp_g.blue);*/
-}
+    //printf("red: %d\n", lamp_g.red);
+    //printf("green: %d\n", lamp_g.green);
+    //printf("blue: %d\n", lamp_g.blue);
+}*/
 
-void rgbw_corner_case()
+/*void rgbw_corner_case()
 {
     if(lamp_g.saturation == 0){
         pwm_duty_g[0] = 0;
@@ -199,15 +199,15 @@ void rgbw_corner_case()
         pwm_duty_g[3] = 0;
     }
     pmp_pwm_set_duty(pwm_duty_g, SIZE);
-}
+}*/
 
 
 void rgbw_start_lamp()
 {
-    uint8_t rainbow = lamp_g.rainbow;
-    lamp_g.rainbow = 0;
+    //int32_t red, green, blue, white;
 
-    int32_t red, green, blue, white;
+    /*uint8_t rainbow = lamp_g.rainbow;
+    lamp_g.rainbow = 0;
     // If smooth color
     if(lamp_g.rgb != prev_rgb){
         printf("smooth color\n");
@@ -495,49 +495,82 @@ void rgbw_start_lamp()
                 vTaskDelay(40 / portTICK_PERIOD_MS);
             }
         }
-    }
-    /*else{ // No smooth nothing
-        printf("nothing smooth\n");
-        red = (uint8_t)((float)lamp_g.red * ((float) lamp_g.brightness / 100) * ((float)lamp_g.color/ 100) * lamp_g.status);
-        green = (uint8_t)((float)lamp_g.green * ((float) lamp_g.brightness / 100) * ((float)lamp_g.color/ 100) * lamp_g.status);
-        blue = (uint8_t)((float)lamp_g.blue * ((float) lamp_g.brightness / 100) * ((float)lamp_g.color/ 100) * lamp_g.status);
-        white = (uint8_t)((float)0xff * ((float) lamp_g.brightness / 100) * ((float)lamp_g.white / 100) * lamp_g.status);
-
-        constrain8(&red, 0, 0xff);
-        constrain8(&green, 0, 0xff);
-        constrain8(&blue, 0, 0xff);
-        constrain8(&white, 0, 0xff);
-
-        printf("pwm_red: %d\n", red);
-        printf("pwm_green: %d\n", green);
-        printf("pwm_blue: %d\n", blue);
-        printf("pwm_white: %d\n", white);
-
-        pwm_duty_g[0] = red;
-        pwm_duty_g[1] = green;
-        pwm_duty_g[2] = blue;
-        pwm_duty_g[3] = white;
-
-        pmp_pwm_set_duty(pwm_duty_g, SIZE);
     }*/
-    rgbw_corner_case();
-    prev_status = lamp_g.status;
-    prev_rgb = lamp_g.rgb;
-    prev_saturation = lamp_g.saturation;
-    prev_brightness =  lamp_g.brightness;
+    // No smooth nothing
+    //printf("nothing smooth\n");
+    /*rgbw_calc_saturation(lamp_g.saturation);
+    printf("white: %d\n", lamp_g.white);
+    printf("color: %d\n", lamp_g.color);
+    rgbw_calc_rgb(lamp_g.rgb);
+    printf("red: %d\n", lamp_g.red);
+    printf("green: %d\n", lamp_g.green);
+    printf("blue: %d\n", lamp_g.blue);
+    red = (int32_t)((float)lamp_g.red * ((float) lamp_g.brightness / 100) * ((float)lamp_g.color/ 100) * lamp_g.status);
+    green = (int32_t)((float)lamp_g.green * ((float) lamp_g.brightness / 100) * ((float)lamp_g.color/ 100) * lamp_g.status);
+    blue = (int32_t)((float)lamp_g.blue * ((float) lamp_g.brightness / 100) * ((float)lamp_g.color/ 100) * lamp_g.status);
+    white = (int32_t)((float)0xff * ((float) lamp_g.brightness / 100) * ((float)lamp_g.white / 100) * lamp_g.status);
+    //rgbw_corner_case();
 
-    lamp_g.rainbow = rainbow;
+    constrain32(&red, 0, 0xff);
+    constrain32(&green, 0, 0xff);
+    constrain32(&blue, 0, 0xff);
+    constrain32(&white, 0, 0xff);
+
+    printf("pwm_red: %d\n", red);
+    printf("pwm_green: %d\n", green);
+    printf("pwm_blue: %d\n", blue);
+    printf("pwm_white: %d\n", white);*/
+
+    /*pwm_duty_g[0] = (uint8_t)red;
+    pwm_duty_g[1] = (uint8_t)(lamp_g.status * 100);
+    pwm_duty_g[2] = (uint8_t)blue;
+    pwm_duty_g[3] = (uint8_t)white;*/
+
+    //pmp_pwm_set_duty(pwm_duty_g, SIZE);
+
+    //prev_status = lamp_g.status;
+    //prev_rgb = lamp_g.rgb;
+    //prev_saturation = lamp_g.saturation;
+    //prev_brightness =  lamp_g.brightness;
+
+    /*lamp_g.rainbow = rainbow;
     if(lamp_g.rainbow == 1){
         xSemaphoreGive(sem_activate_rainbow);
-    }
-    /*printf("red: %d\n", red);
-    printf("green: %d\n", green);
-    printf("blue: %d\n", blue);
-    printf("white: %d\n", white);*/
+    }*/
+    //printf("red: %d\n", red);
+    //printf("green: %d\n", green);
+    //printf("blue: %d\n", blue);
+    //printf("white: %d\n", white);
+
+    /*gpio_write(12, lamp_g.status);
+    gpio_write(13, lamp_g.saturation);
+    gpio_write(14, lamp_g.brightness);
+    gpio_write(2, 0);*/
+    pwm_duty_g[0] = lamp_g.status * 0xff;
+    pwm_duty_g[1] = lamp_g.saturation;
+    pwm_duty_g[2] = lamp_g.brightness;
+    pwm_duty_g[3] = 0;
+    pmp_pwm_set_duty(pwm_duty_g);
 }
 
+void rgbw_init()
+{
+    // some inits
+    gpio_enable(SWITCH, GPIO_OUTPUT);
+    gpio_write(SWITCH, 1);
+    // pmp - poor mans pwm
+    pmp_pwm_init(FREQUENCY, RESOLUTION);
+    pmp_pwm_pins_init(pwm_pin_g);
 
-void rgbw_task(void *pvParameters)
+    // init lamp off
+    pwm_duty_g[0] = 0xff;
+    pwm_duty_g[1] = 0;
+    pwm_duty_g[2] = 0;
+    pwm_duty_g[3] = 0;
+    pmp_pwm_set_duty(pwm_duty_g);
+}
+
+/*void rgbw_task(void *pvParameters)
 {
     // some inits
     gpio_enable(SWITCH, GPIO_OUTPUT);
@@ -596,13 +629,13 @@ void rgbw_task(void *pvParameters)
                 lamp_g.rainbow = rainbow;
 
 
-            }*/
+            }
             rgbw_start_lamp();
         }
     }
-}
+}*/
 
-void rainbow_task(void *pvParameters)
+/*void rainbow_task(void *pvParameters)
 {
     int32_t red, green, blue, white;
     int32_t color = 0, delay;
@@ -659,4 +692,4 @@ void rainbow_task(void *pvParameters)
         //stack_size_rgbw = uxTaskGetStackHighWaterMark(NULL);
         //printf("rgbw size: %d", stack_size_rgbw);
     }
-}
+}*/

@@ -24,18 +24,18 @@ typedef struct
     uint16_t rgb;
 } rgbw_t;
 
-SemaphoreHandle_t random_rgb;
+//SemaphoreHandle_t random_rgb;
 
-void rainbow_task(void *delay);
-void rgbw_task(void *pvParameters);
+//void rainbow_task(void *delay);
+//void rgbw_task(void *pvParameters);
 
-/*void rgbw_init(void);
+void rgbw_init(void);
 void rgbw_start_lamp();
 
-void rgbw_status(int32_t value);
-void rgbw_color(int32_t value);
-void rgbw_brightness(int32_t value);
-void rgbw_saturation(int32_t value);*/
+void rgbw_status(uint8_t value);
+void rgbw_color(uint16_t value);
+void rgbw_brightness(uint8_t value);
+void rgbw_saturation(uint8_t value);
 
 
 

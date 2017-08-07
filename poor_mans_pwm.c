@@ -1,6 +1,27 @@
-#include <stdlib.h> 
-#include <stdio.h> 
+#include <stdlib.h>
+#include <stdio.h>
 #include "poor_mans_pwm.h"
+
+#define RED 13
+#define GREEN 12
+#define BLUE 14
+#define WHITE 2
+#define SWITCH 15
+
+#define FREQUENCY 150
+#define RESOLUTION 0xff
+#define SIZE 4
+
+#define SATURATION_MIN 0
+#define SATURATION_MAX 200
+#define COLOR_MAX 1530
+
+#define DIMMER_TIME_MS 30
+
+//uint8_t pwm_pin_g[] = {RED, GREEN, BLUE, WHITE};
+//uint8_t pwm_duty_g[] = {0, 0, 0, 0};
+
+
 
 /* Poor mans PWM
  * The routine fires frequency*resolution times a second.
@@ -9,9 +30,9 @@
 static void frc1_interrupt_handler(void);
 static void pmp_pwm_set(uint8_t pin, uint8_t duty);
 
-static uint8_t *pmp_pwm_pins_g = NULL;
-static uint8_t *pmp_pwm_duty_g = NULL;
-static uint8_t pmp_pwm_pins_size_g = 0;
+static uint8_t pmp_pwm_pins_g[SIZE];
+static uint8_t pmp_pwm_duty_g[SIZE];
+static uint8_t pmp_pwm_pins_size_g = SIZE;
 static volatile uint8_t resolution_g = 0;
 static volatile uint16_t frequency_g = 0;
 
@@ -48,22 +69,19 @@ static void frc1_interrupt_handler(void)
     }
 }
 
-void pmp_pwm_set_duty(uint8_t *duty, uint8_t size)
+void pmp_pwm_set_duty(uint8_t *duty)
 {
     uint8_t i;
-    for(i = 0; i < size; i++){
+    for(i = 0; i < SIZE; i++){
         pmp_pwm_duty_g[i] = duty[i];
     }
 }
 
 
-void pmp_pwm_pins_init(uint8_t *pins, uint8_t size)
+void pmp_pwm_pins_init(uint8_t *pins)
 {
-    pmp_pwm_pins_g = malloc(sizeof(uint8_t) * size);
-    pmp_pwm_duty_g = malloc(sizeof(uint8_t) * size);
-    pmp_pwm_pins_size_g = size;
     uint8_t i;
-    for(i = 0; i < size; i++){
+    for(i = 0; i < SIZE; i++){
         gpio_enable(pins[i], GPIO_OUTPUT);
         pmp_pwm_pins_g[i] = pins[i];
         pmp_pwm_duty_g[i] = 0;
