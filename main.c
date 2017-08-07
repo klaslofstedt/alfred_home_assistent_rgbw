@@ -21,8 +21,7 @@
 #include <semphr.h>
 #include "mqtt.h"
 #include "wifi.h"
-#include "rgbw.h"
-#include "poor_mans_pwm.h"
+
 
 
 void user_init(void)
@@ -30,24 +29,10 @@ void user_init(void)
     uart_set_baud(0, 115200);
     printf("SDK version:%s\n", sdk_system_get_sdk_version());
 
-    rgbw_init();
-    gpio_enable(12, GPIO_OUTPUT);
-    gpio_enable(13, GPIO_OUTPUT);
-    gpio_enable(14, GPIO_OUTPUT);
-    gpio_enable(2, GPIO_OUTPUT);
-    gpio_write(12, 0);
-    gpio_write(13, 1);
-    gpio_write(14, 0);
-    gpio_write(2, 0);
+    gpio_enable(PLUG_PIN, GPIO_OUTPUT);
+    gpio_write(PLUG_PIN, 0);
 
     vSemaphoreCreateBinary(wifi_alive);
-
-    //vSemaphoreCreateBinary(sem_mqtt_new);
-    //vSemaphoreCreateBinary(sem_activate_rainbow);
-
-    //vSemaphoreCreateBinary(random_rgb);
-    // Initialize random_rgb as 0 to not kickstart the rainbow_task on boot
-    //xSemaphoreTake(random_rgb, 1);
 
     publish_queue = xQueueCreate(4, PUB_MSG_LEN);
 
@@ -63,9 +48,5 @@ void user_init(void)
 
     xTaskCreate(&mqtt_task, (const char *)"mqtt_task", 1024, NULL, 4, NULL);
 
-    //xTaskCreate(&rgbw_task, (const char *)"rgbw_task", 1024, NULL, 4, NULL);
-
     xTaskCreate(&heartbeat_task, (const char *)"heartbeat_task", 256, NULL, 3, NULL);
-
-    //xTaskCreate(&rainbow_task, (const char *)"rainbow_task", 256, NULL, 4, NULL); // maybe 3?
 }

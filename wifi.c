@@ -34,7 +34,7 @@ void wifi_task(void *pvParameters)
         }
         if (status == STATION_GOT_IP) {
             printf("WiFi: Connected1\n\r");
-            xSemaphoreGive( wifi_alive );
+            xSemaphoreGive(wifi_alive);
             taskYIELD();
         }
 
