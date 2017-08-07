@@ -26,20 +26,17 @@
 #define MQTT_PASS NULL
 #define PUB_MSG_LEN 16
 
-typedef struct
-{
-    uint8_t status;
-    uint16_t color;
-    uint8_t white;
-    // raw data before conversion
-    uint8_t saturation;
-    uint8_t brightness;
-    uint8_t random;
-    uint8_t speed;
-} rgbw_lamp_t;
+SemaphoreHandle_t sem_mqtt_new;
+SemaphoreHandle_t sem_activate_rainbow;
 
-xQueueHandle publish_queue;
+QueueHandle_t publish_queue;
 
+QueueHandle_t queue_mqtt_status;
+QueueHandle_t queue_mqtt_color;
+QueueHandle_t queue_mqtt_saturation;
+QueueHandle_t queue_mqtt_brightness;
+QueueHandle_t queue_mqtt_rainbow;
+QueueHandle_t queue_mqtt_speed;
 
 void mqtt_status(mqtt_message_data_t *md);
 void mqtt_color(mqtt_message_data_t *md);

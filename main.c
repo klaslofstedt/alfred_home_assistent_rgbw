@@ -34,26 +34,28 @@ void user_init(void)
     //rgbw_init();
 
     vSemaphoreCreateBinary(wifi_alive);
-    vSemaphoreCreateBinary(mqtt_new);
+    vSemaphoreCreateBinary(sem_mqtt_new);
+    vSemaphoreCreateBinary(sem_activate_rainbow);
     //vSemaphoreCreateBinary(random_rgb);
     // Initialize random_rgb as 0 to not kickstart the rainbow_task on boot
     //xSemaphoreTake(random_rgb, 1);
 
     publish_queue = xQueueCreate(12, PUB_MSG_LEN);
 
-    xTaskCreate(&wifi_task, (int8_t *)"wifi_task", 256, NULL, 2, NULL);
+    queue_mqtt_status = xQueueCreate(1, sizeof(uint8_t));
+    queue_mqtt_color = xQueueCreate(1, sizeof(uint16_t));
+    queue_mqtt_saturation = xQueueCreate(1, sizeof(uint8_t));
+    queue_mqtt_brightness = xQueueCreate(1, sizeof(uint8_t));
+    queue_mqtt_rainbow = xQueueCreate(1, sizeof(uint8_t));
+    queue_mqtt_speed = xQueueCreate(1, sizeof(uint8_t));
 
-    xTaskCreate(&mqtt_task, (int8_t *)"mqtt_task", 1024, NULL, 5, NULL);
+    xTaskCreate(&wifi_task, (const char *)"wifi_task", 256, NULL, 2, NULL);
 
-    xTaskCreate(&rgbw_task, (int8_t *)"rgbw_task", 1024, NULL, 4, NULL);
+    xTaskCreate(&mqtt_task, (const char *)"mqtt_task", 1024, NULL, 4, NULL);
 
-    xTaskCreate(&heartbeat_task, (int8_t *)"heartbeat_task", 256, NULL, 3, NULL);
-    /*xTaskCreate(
-            &rainbow_task,
-            (int8_t *)"rainbow_task",
-            256,
-            NULL,
-            3,
-            NULL);
-            */
+    xTaskCreate(&rgbw_task, (const char *)"rgbw_task", 1024, NULL, 4, NULL);
+
+    xTaskCreate(&heartbeat_task, (const char *)"heartbeat_task", 256, NULL, 3, NULL);
+
+    xTaskCreate(&rainbow_task, (const char *)"rainbow_task", 256, NULL, 4, NULL); // maybe 3?
 }

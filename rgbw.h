@@ -19,20 +19,23 @@ typedef struct
     // raw data before conversion
     uint8_t saturation;
     uint8_t brightness;
-    uint8_t random;
+    uint8_t rainbow;
     uint8_t speed;
     uint16_t rgb;
 } rgbw_t;
 
-xSemaphoreHandle random_rgb;
+SemaphoreHandle_t random_rgb;
+
 void rainbow_task(void *delay);
-void rgbw_init(void);
+void rgbw_task(void *pvParameters);
+
+/*void rgbw_init(void);
 void rgbw_start_lamp();
 
-void rgbw_status(uint8_t value);
-void rgbw_color(uint16_t value);
-void rgbw_brightness(uint8_t value);
-void rgbw_saturation(uint8_t value);
+void rgbw_status(int32_t value);
+void rgbw_color(int32_t value);
+void rgbw_brightness(int32_t value);
+void rgbw_saturation(int32_t value);*/
 
 
 

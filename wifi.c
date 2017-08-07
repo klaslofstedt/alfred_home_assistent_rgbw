@@ -1,5 +1,6 @@
 #include "wifi.h"
 
+UBaseType_t stack_size_wifi;
 
 void wifi_task(void *pvParameters)
 {
@@ -28,7 +29,7 @@ void wifi_task(void *pvParameters)
                 printf("WiFi: connection failed\r\n");
                 break;
             }
-            vTaskDelay( 1000 / portTICK_RATE_MS );
+            vTaskDelay( 1000 / portTICK_PERIOD_MS );
             --retries;
         }
         if (status == STATION_GOT_IP) {
@@ -43,6 +44,8 @@ void wifi_task(void *pvParameters)
         }
         printf("WiFi: disconnected\n\r");
         sdk_wifi_station_disconnect();
-        vTaskDelay( 1000 / portTICK_RATE_MS );
+        vTaskDelay( 1000 / portTICK_PERIOD_MS );
+        //stack_size_wifi = uxTaskGetStackHighWaterMark(NULL);
+        //printf("rgbw size: %d", stack_size_wifi);
     }
 }
