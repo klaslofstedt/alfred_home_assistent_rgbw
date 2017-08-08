@@ -29,8 +29,12 @@ void user_init(void)
     uart_set_baud(0, 115200);
     printf("SDK version:%s\n", sdk_system_get_sdk_version());
 
-    gpio_enable(PLUG_PIN, GPIO_OUTPUT);
-    gpio_write(PLUG_PIN, 0);
+    //gpio_enable(10, GPIO_OUTPUT);
+    gpio_enable(12, GPIO_OUTPUT);
+    gpio_enable(13, GPIO_OUTPUT);
+    //gpio_write(10, 1);
+    //gpio_write(12, 1);
+    //gpio_write(13, 0);
 
     vSemaphoreCreateBinary(wifi_alive);
 

@@ -18,7 +18,7 @@ void mqtt_status(mqtt_message_data_t *md)
 
     free(mqtt_payload);
 
-    gpio_write(PLUG_PIN, status);
+    gpio_write(12, status);
 }
 
 
@@ -143,8 +143,11 @@ void heartbeat_task(void *pvParameters)
         vTaskDelayUntil(&xLastWakeTime, 5000 / portTICK_PERIOD_MS);
         printf("beat: %d\n", count);
         snprintf(msg, PUB_MSG_LEN, "Beat %d\r\n", count++);
+        uint8_t toggle = 0;
         if (xQueueSend(publish_queue, (void *)msg, 0) == pdFALSE) {
             printf("Publish queue overflow.\r\n");
+            gpio_write(13, toggle);
+            toggle ^= 1;
         }
         if(count > 10){
             count = 1;

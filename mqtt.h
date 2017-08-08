@@ -26,6 +26,8 @@
 #define PUB_MSG_LEN 16
 
 #define PLUG_PIN 12
+#define LED_PIN 13
+#define BUTTON_PIN 0 // not used for now
 
 QueueHandle_t publish_queue;
 
