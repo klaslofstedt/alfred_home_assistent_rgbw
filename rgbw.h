@@ -25,8 +25,9 @@ typedef struct
 } rgbw_t;
 
 //SemaphoreHandle_t random_rgb;
+SemaphoreHandle_t rainbow_sem;
 
-//void rainbow_task(void *delay);
+void rainbow_task(void *delay);
 //void rgbw_task(void *pvParameters);
 
 void rgbw_init(void);

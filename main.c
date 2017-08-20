@@ -31,16 +31,10 @@ void user_init(void)
     printf("SDK version:%s\n", sdk_system_get_sdk_version());
 
     rgbw_init();
-    gpio_enable(12, GPIO_OUTPUT);
-    gpio_enable(13, GPIO_OUTPUT);
-    gpio_enable(14, GPIO_OUTPUT);
-    gpio_enable(2, GPIO_OUTPUT);
-    gpio_write(12, 0);
-    gpio_write(13, 1);
-    gpio_write(14, 0);
-    gpio_write(2, 0);
+
 
     vSemaphoreCreateBinary(wifi_alive);
+    vSemaphoreCreateBinary(rainbow_sem);
 
     //vSemaphoreCreateBinary(sem_mqtt_new);
     //vSemaphoreCreateBinary(sem_activate_rainbow);
@@ -67,5 +61,5 @@ void user_init(void)
 
     xTaskCreate(&heartbeat_task, (const char *)"heartbeat_task", 256, NULL, 3, NULL);
 
-    //xTaskCreate(&rainbow_task, (const char *)"rainbow_task", 256, NULL, 4, NULL); // maybe 3?
+    xTaskCreate(&rainbow_task, (const char *)"rainbow_task", 256, NULL, 3, NULL); // maybe 3?
 }

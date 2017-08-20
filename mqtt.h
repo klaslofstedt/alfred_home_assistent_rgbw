@@ -31,17 +31,8 @@
 
 QueueHandle_t publish_queue;
 
-/*QueueHandle_t queue_mqtt_status;
-QueueHandle_t queue_mqtt_color;
-QueueHandle_t queue_mqtt_saturation;
-QueueHandle_t queue_mqtt_brightness;
-QueueHandle_t queue_mqtt_rainbow;
-QueueHandle_t queue_mqtt_speed;*/
 
 void mqtt_status(mqtt_message_data_t *md);
-//void mqtt_color(mqtt_message_data_t *md);
-//void mqtt_brightness(mqtt_message_data_t *md);
-//void mqtt_saturation(mqtt_message_data_t *md);
 const char *mqtt_get_my_id(void);
 void mqtt_message_process(char **data, uint8_t len);
 void mqtt_task(void *pvParameters);
