@@ -209,12 +209,6 @@ void mqtt_task(void *pvParameters)
     strcpy(mqtt_client_id, "ESP-");
     strcat(mqtt_client_id, mqtt_get_my_id());
 
-
-
-    //vSemaphoreCreateBinary(sem_mqtt_new);
-    //xSemaphoreTake(sem_mqtt_new, 1);
-
-
     while(1) {
         xSemaphoreTake(wifi_alive, portMAX_DELAY);
         printf("%s: started\n\r", __func__);
@@ -247,15 +241,13 @@ void mqtt_task(void *pvParameters)
         }
         printf("done\r\n");
 
-        mqtt_subscribe(&client, "rgbw/1/status", MQTT_QOS1, mqtt_status);
-        mqtt_subscribe(&client, "rgbw/1/color", MQTT_QOS1, mqtt_color);
-        mqtt_subscribe(&client, "rgbw/1/brightness", MQTT_QOS1, mqtt_brightness);
-        mqtt_subscribe(&client, "rgbw/1/saturation", MQTT_QOS1, mqtt_saturation);
+        mqtt_subscribe(&client, "rgbw/2/status", MQTT_QOS1, mqtt_status);
+        mqtt_subscribe(&client, "rgbw/2/color", MQTT_QOS1, mqtt_color);
+        mqtt_subscribe(&client, "rgbw/2/brightness", MQTT_QOS1, mqtt_brightness);
+        mqtt_subscribe(&client, "rgbw/2/saturation", MQTT_QOS1, mqtt_saturation);
         //mqtt_subscribe(&client, "rgbw/1/rainbow", MQTT_QOS1, mqtt_rainbow);
         //mqtt_subscribe(&client, "rgbw/1/speed", MQTT_QOS1, mqtt_speed);
 
-        //printf("start_pwm\n");
-        //xSemaphoreGive(start_pwm);
         xQueueReset(publish_queue);
 
         while(1){
@@ -269,7 +261,7 @@ void mqtt_task(void *pvParameters)
                 message.dup = 0;
                 message.qos = MQTT_QOS1;
                 message.retained = 0;
-                ret = mqtt_publish(&client, "rgbw/1/heartbeat", &message);
+                ret = mqtt_publish(&client, "rgbw/2/heartbeat", &message);
                 if (ret != MQTT_SUCCESS ){
                     printf("error while publishing message: %d\n", ret );
                     break;
@@ -308,7 +300,5 @@ void heartbeat_task(void *pvParameters)
         if(count > 10){
             count = 1;
         }
-        //stack_size_heartbeat = uxTaskGetStackHighWaterMark(NULL);
-        //printf("rgbw size: %d", stack_size_heartbeat);
     }
 }
